@@ -182,16 +182,19 @@ TETRIS.Game = TETRIS.Game || {
 	advance: function(){
 		let gameover = false;
 		if(this.board.hasLanded()){
-			this.board.update();
-			// Check for completed lines here.
-			this.score += this.board.checkLineClears();
-			let nextTet = this.queue.next();
-			let gameover = this.board.spawn(nextTet);
-
-
+			this.handleLanding();
 		}
 		this.board.fall();
 		return gameover;
+	},
+
+	handleLanding: function(){
+
+		this.board.update();
+		// Check for completed lines here.
+		this.score += this.board.checkLineClears();
+		let nextTet = this.queue.next();
+		let gameover = this.board.spawn(nextTet);
 	},
 
 	init: function(width, height){
@@ -208,11 +211,16 @@ TETRIS.Game = TETRIS.Game || {
 
 	handleKeyEvent: function(key){
 		this.board.move(key);
+		if(this.board.hasLanded()){
+			this.handleLanding();
+		}
 	},
 
 	getBoard(){
 		return this.board.getBoard();
 	}
+
+
 
 
 }
