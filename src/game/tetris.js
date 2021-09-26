@@ -1,131 +1,12 @@
-//import {add, rotateRight} from 'game/rotation_system'
-//import { RotationSystem, SRS } from '/Users/colbyking/Documents/projects/tetris/tetris/src/game/rotation_system.js';
 import { RotationSystem, SRS } from './rotation_system';
-import { TetrominoQueue, TetrominoFactory } from './tetronimo'
-// Constants 
+import { TetrominoQueue, TetrominoFactory } from './tetronimo';
+import * as Config from '../app_constants';
 
-var ARROW_LEFT = 37;
-var ARROW_UP = 38;
-var ARROW_RIGHT = 39;
-var ARROW_DOWN = 40;
+
 
 
 var TETRIS = TETRIS || {};
 
-TETRIS.TETROMINOS = {
-	I: 1,
-	O: 2,
-	T: 3,
-	J: 4,
-	L: 5,
-	S: 6,
-	Z: 7
-};
-
-TETRIS.CONFIG = {
-	START_X: 5,
-	START_Y: 0,
-	QUEUE_LENGTH: 6,
-};
-
-// function TetrominoFactory(t){
-// 	var shape;
-// 	var pieceType;
-// 	switch(t){
-// 		case TETRIS.TETROMINOS.I:
-// 			shape = [
-// 					 [0, 0, 0, 0],
-// 					 [1, 1, 1, 1],
-// 					 [0, 0, 0, 0],
-// 					 [0, 0, 0, 0],
-// 					];
-// 			pieceType = TETRIS.TETROMINOS.I;
-// 			break;
-// 		case TETRIS.TETROMINOS.O:
-// 			shape = [
-// 					 [0, 2, 2, 0],
-// 					 [0, 2, 2, 0],
-// 					 [0, 0, 0, 0]
-// 					];
-// 			pieceType = TETRIS.TETROMINOS.O;
-// 			break;
-// 		case TETRIS.TETROMINOS.T:
-// 			shape = [
-// 					 [0, 0, 0],
-// 				     [3, 3, 3],
-// 					 [0, 3, 0]
-// 					];
-// 			pieceType = TETRIS.TETROMINOS.T;
-// 			break;
-// 		case TETRIS.TETROMINOS.J:
-// 			shape = [
-// 					 [4, 0, 0],
-// 					 [4, 4, 4],
-// 					 [0, 0, 0]
-// 					];
-// 			pieceType = TETRIS.TETROMINOS.I;
-// 			break;
-// 		case TETRIS.TETROMINOS.L:
-// 			shape = [
-// 				     [0, 0, 5],
-// 					 [5, 5, 5],
-// 					 [0, 0, 0]
-// 					];
-// 			break;
-// 		case TETRIS.TETROMINOS.S:
-// 			shape = [
-// 					 [0, 6, 6],
-// 					 [6, 6, 0],
-// 					 [0, 0, 0]
-// 					];
-// 			break;
-// 		case TETRIS.TETROMINOS.Z:
-// 			shape = [
-// 					 [7, 7, 0],
-// 					 [0, 7, 7],
-// 					 [0, 0, 0]
-// 					];
-// 			break;
-// 		default:
-// 			throw new Error("Unable to instantiate tetromino. Invalid identifier: " + t);
-// 	}
-// 	// Set default starting coordinates 
-// 	let piece = {
-// 		type: pieceType,
-// 		coords: {
-// 			x: TETRIS.CONFIG.START_X,
-// 			y: TETRIS.CONFIG.START_Y
-// 		},
-// 		shape: shape
-// 	};
-// 	return piece; 
-// }
-
-// class TetrominoQueue {
-// 	constructor(){
-// 		this.queue = [];
-// 		this.queue_init();
-// 	}
-
-// 	generateNextTetromino(){
-// 		var NUM_PIECES = TETRIS.TETROMINOS.Z;
-// 		var pieceId = Math.floor(Math.random() * (NUM_PIECES) + 1);
-// 		var nextPiece = TetrominoFactory(pieceId);
-// 		return nextPiece;
-// 	}
-
-// 	queue_init(){
-// 		for(var i = 0; i < TETRIS.CONFIG.QUEUE_LENGTH; i++){
-// 			this.queue.push(this.generateNextTetromino());
-// 		}
-
-// 	}
-
-// 	next(){
-// 		this.queue.push(this.generateNextTetromino());
-// 		return this.queue.shift();
-// 	}
-// }
 
 class GameBoard {
 	constructor(width, height, rotationStrategy){
@@ -150,23 +31,29 @@ class GameBoard {
 
 	move(key){
 		switch(key){
-			case ARROW_LEFT:
+			case Config.actions.SHIFT_LEFT:
 				if(!this.collides(-1, 0, this.falling)){
 					this.falling.coords.x--;
 				}
 				break;
-			case ARROW_RIGHT:
+			case Config.actions.SHIFT_RIGHT:
 				if(!this.collides(1, 0, this.falling)){
 					this.falling.coords.x++;
 				}
 				break;
-			case ARROW_DOWN:
+			case Config.actions.SHIFT_DOWN:
 				if(!this.collides(0, 1, this.falling)){
 					this.falling.coords.y++;
 				}
 				break;
-			case ARROW_UP:
+			case Config.actions.ROTATE:
 				this.falling = this.rotater.rotate(this.falling);
+				break;
+			case Config.actions.HARD_DROP:
+				while(!this.collides(0, 1, this.falling)){
+					this.falling.coords.y++;
+				}
+				break;
 		}
 	}
 
@@ -174,7 +61,7 @@ class GameBoard {
 		// falling shape coordinates 
 		let x = piece.coords.x,
 			y = piece.coords.y;
-
+		//console.log(yOffset, xOffset, piece);
 		for(let i = 0; i < piece.shape.length; i++){
 			for(let j = 0; j < piece.shape[i].length; j++){
 				// get x, y coordinates on the board 
@@ -183,8 +70,9 @@ class GameBoard {
 				// if the space isn't empty 
 				if(piece.shape[i][j]){
 					try{
-						if(this.board[CUR_Y + yOffset][CUR_X + xOffset] === undefined || // out of bounds
-						   this.board[CUR_Y + yOffset][CUR_X + xOffset] > 0){ // space occupied
+						if(this.board[CUR_Y + yOffset][CUR_X + xOffset] === undefined){ // out of bounds
+							return true;
+						} else if(this.board[CUR_Y + yOffset][CUR_X + xOffset] > 0){ // space occupied
 							return true;
 						}
 					// collision: out of bounds 
@@ -199,31 +87,70 @@ class GameBoard {
 
 	}
 
+	// Checks if a row can be cleared 
+	rowIsFull(index){
+		for(let i = 0; i < this.board[0].length; i++){
+			if(this.board[index][i] === 0 ){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// clears marked rows and shifts the board down
+	clearLines(){
+		for(let i = 0; i < this.board.length; i++){
+			if(this.board[i] === null){
+				for(let j = i; j > 0; j--){
+					this.board[j] = this.board[j-1];
+				}
+				this.board[0] = new Array(this.boardWidth).fill(0);
+			}
+		}
+
+	}
+
+	checkLineClears(){
+		// Optimize to only check around where the last piece landed 
+		let height = this.falling.shape.length;
+		let y = this.falling.coords.y; 
+		let linesCleared = 0; 
+		for(let i = 0; i < this.boardHeight; i++){
+			if(this.rowIsFull(i)){
+				this.board[i] = null;
+				linesCleared += 1; 
+			}
+		}
+		this.clearLines();
+		// return score
+		return linesCleared;
+	}
+
+
 	/** Draws the current tetromino in play on the board **/ 
-	placeTetromino(piece){
+	spawn(piece){
+		let gameover = false;
+		if(this.collides(0, 0, piece)){
+			console.log("GAMEOVER PIECE:");
+			console.log(piece);
+			piece.coords.y++;
+			gameover = true;
+		}
 		this.falling = piece;
+		return gameover;
 	}
 
 	// Checks if the current falling piece has landed
 	hasLanded(){
-		let x = this.falling.coords.x;
-		let y = this.falling.coords.y; 
-		for(let i = 0; i < this.falling.shape.length; i++){
-			for(let j = 0; j < this.falling.shape[i].length; j++){
-				var CUR_Y = (y + i);
-				var CUR_X = (x + j);
-				if(this.falling.shape[i][j]){
-					try{
-						if(this.board[CUR_Y + 1][CUR_X]){
-							return true;
-						}
-					} catch (err){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+		return this.collides(0, 1, this.falling);
+	}
+
+	update(){
+		this.board = this.getBoard();
+	}
+
+	setBoard(board){
+		this.board = board;
 	}
 
 	getBoard(){
@@ -249,26 +176,47 @@ class GameBoard {
 }
 
 TETRIS.Game = TETRIS.Game || {
-	board: new GameBoard(10, 24, SRS),
-	queue: new TetrominoQueue(),
-	counter: 0,
+	board: null,
+	queue: null,
+	score: 0,
 	advance: function(){
+		let gameover = false;
 		if(this.board.hasLanded()){
+			this.board.update();
 			// Check for completed lines here.
-			this.board.board = this.board.getBoard();
+			this.score += this.board.checkLineClears();
 			let nextTet = this.queue.next();
-			this.board.placeTetromino(nextTet);
+			let gameover = this.board.spawn(nextTet);
+			// if(gameover){
+			// 	console.log("GAME OVER");
+			// 	console.log(nextTet);
+			// 	return gameover
+			// }
+
+
 		}
 		this.board.fall();
+		return gameover;
 	},
 
-	init: function(){
+	init: function(width, height){
+		this.board = new GameBoard(width, height, SRS);
+		this.queue = new TetrominoQueue();
 		let firstTet = this.queue.next();
-		this.board.placeTetromino(firstTet);
+		this.board.spawn(firstTet);
+	},
+
+	init_test: function(width, height){
+		this.board = new GameBoard(width, height, SRS);
+		this.queue = new TetrominoQueue();
 	},
 
 	handleKeyEvent: function(key){
 		this.board.move(key);
+	},
+
+	getBoard(){
+		return this.board.getBoard();
 	}
 
 
@@ -276,5 +224,5 @@ TETRIS.Game = TETRIS.Game || {
 
 
 export default TETRIS;
-//module.exports = TETRIS
+
 

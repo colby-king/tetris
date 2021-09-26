@@ -32,6 +32,26 @@ ol, ul {
   width: 30px;
 }
 
+.small-square {
+  background: #fff;
+  /*border: 1px solid #999;*/
+  float: left;
+  font-size: 8px;
+  font-weight: bold;
+  line-height: 10px;
+  height: 20px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 20px;
+}
+
+
+.small-square.color-0{
+
+}
+
 .color-1{
   background-color:  #FFDE06;
 }
@@ -71,5 +91,13 @@ ol, ul {
   margin-left: 20px;
 }
 
+.piece-queue {
+  margin-top: 60px;
+  height: 100%;
+}
+
+.piece-queue-box{
+  margin-top: 20%;
+}
 
 

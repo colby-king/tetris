@@ -75,7 +75,8 @@ function copyTetromino(piece){
 }
 
 
-module.exports = {
+export {
 	RotationSystem,
-	SRS
-};
+	SRS,
+	rotateRight
+}

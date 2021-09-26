@@ -1,6 +1,9 @@
+import * as Config from '../app_constants';
 
 
-// Add constants...
+// Add constants...,
+// Make the tetromino thing better. 
+
 
 let TETROMINOS = {
 	I: 1,
@@ -12,10 +15,10 @@ let TETROMINOS = {
 	Z: 7
 };
 
-function TetrominoFactory(t){
+function TetrominoFactory(tetType, xStart, yStart){
 	var shape;
 	var pieceType;
-	switch(t){
+	switch(tetType){
 		case TETROMINOS.I:
 			shape = [
 					 [0, 0, 0, 0],
@@ -71,14 +74,14 @@ function TetrominoFactory(t){
 					];
 			break;
 		default:
-			throw new Error("Unable to instantiate tetromino. Invalid identifier: " + t);
+			throw new Error("Unable to instantiate tetromino. Invalid identifier: " + tetType);
 	}
 	// Set default starting coordinates 
 	let piece = {
 		type: pieceType,
 		coords: {
-			x: 5,
-			y: 0
+			x: xStart,
+			y: yStart
 		},
 		shape: shape
 	};
@@ -94,7 +97,7 @@ class TetrominoQueue {
 	generateNextTetromino(){
 		var NUM_PIECES = TETROMINOS.Z;
 		var pieceId = Math.floor(Math.random() * (NUM_PIECES) + 1);
-		var nextPiece = TetrominoFactory(pieceId);
+		var nextPiece = TetrominoFactory(pieceId, Config.START_X, Config.START_Y);
 		return nextPiece;
 	}
 
@@ -109,9 +112,15 @@ class TetrominoQueue {
 		this.queue.push(this.generateNextTetromino());
 		return this.queue.shift();
 	}
+
+	getQueue(){
+		return this.queue;
+	}
 }
 
-module.exports = {
+export {
 	TetrominoQueue,
-	TetrominoFactory
+	TetrominoFactory,
+	TETROMINOS
 }
+
