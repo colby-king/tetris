@@ -187,11 +187,6 @@ TETRIS.Game = TETRIS.Game || {
 			this.score += this.board.checkLineClears();
 			let nextTet = this.queue.next();
 			let gameover = this.board.spawn(nextTet);
-			// if(gameover){
-			// 	console.log("GAME OVER");
-			// 	console.log(nextTet);
-			// 	return gameover
-			// }
 
 
 		}
